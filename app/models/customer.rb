@@ -1,5 +1,13 @@
 class Customer < ApplicationRecord
   # get modules to help with some functionality
+
+  require "./lib/helpers/activeable"
+  require "./lib/helpers/baking"
+  require "./lib/helpers/cart"
+  require "./lib/helpers/deletions"
+  require "./lib/helpers/shipping"
+  require "./lib/helpers/validations"
+
   include AppHelpers::Validations
   include AppHelpers::Deletions
   include AppHelpers::Activeable::InstanceMethods
@@ -11,16 +19,19 @@ class Customer < ApplicationRecord
   belongs_to :user
 
   # Allow user to be nested within customer
-  accepts_nested_attributes_for :user, reject_if: ->(user) { user[:username].blank? }, allow_destroy: true
+  accepts_nested_attributes_for :user, reject_if: -> (user) { user[:username].blank? }, allow_destroy: true
 
   # Scopes
-  scope :alphabetical,  -> { order(:last_name).order(:first_name) }
+  scope :alphabetical, -> { order(:last_name).order(:first_name) }
+
+  # comment out the line below
+  # scope :active, -> {where(active: true)}
+  # scope :inactive, -> {where(active: false)}
 
   # Validations
   validates_presence_of :last_name, :first_name
   validates_format_of :phone, with: /\A(\d{10}|\(?\d{3}\)?[-. ]\d{3}[-.]\d{4})\z/, message: "should be 10 digits (area code needed) and delimited with dashes only"
   validates_format_of :email, with: /\A[\w]([^@\s,;]+)@(([\w-]+\.)+(com|edu|org|net|gov|mil|biz|info))\z/i, message: "is not a valid format"
-
 
   # Callbacks
   before_save :reformat_phone
@@ -42,8 +53,9 @@ class Customer < ApplicationRecord
 
   # Private methods
   private
+
   def reformat_phone
-    self.phone = self.phone.to_s.gsub(/[^0-9]/,"")
+    self.phone = self.phone.to_s.gsub(/[^0-9]/, "")
   end
 
   def deactive_user_if_customer_inactive

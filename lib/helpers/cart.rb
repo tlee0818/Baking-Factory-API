@@ -18,7 +18,7 @@ module AppHelpers
     end
 
     def add_item_to_cart(item_id)
-      if session[:cart].keys.include?(item_id)
+      if session[:cart].keys.include?(item_id.to_s)
         # if item in cart, increment quantity by 1
         session[:cart][item_id] += 1
       else

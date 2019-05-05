@@ -1,10 +1,11 @@
 class OrdersController < ApplicationController
+  swagger_controller :orders, "Orders Management"
 
-  swagger_controller :customer, "Order Management"
+  before_action :set_order, only: [:show]
 
   swagger_api :index do
-    summary "Fetches all Orders"
-    notes "This lists all the Orders"
+    summary "Fetches all orders"
+    notes "This lists all the orders"
   end
 
   swagger_api :show do
@@ -14,35 +15,17 @@ class OrdersController < ApplicationController
     response :not_found
   end
 
-  before_action :set_order, only: [:show, :destroy]
-  
   def index
-    @orders = Order.all
-  
-    render json: @orders
+    @all_orders = Order.all
+    render json: @all_orders, each_serializer: OrderSerializer
   end
 
   def show
-    render json: @orders
+    render json: @order, serializer: OrderShowSerializer
   end
 
-  # def new
-  #   @order = Order.new
-  # end
-
-  # def create
-  #   @order = Order.new(order_params)
-  #   @order.date = Date.current
-  #   if @order.save
-  #     @order.pay
-  #     redirect_to @order, notice: "Thank you for ordering from the Baking Factory."
-  #   else
-  #     render action: 'new'
-  #   end
-  # end
-  
-
   private
+
   def set_order
     @order = Order.find(params[:id])
   end
@@ -50,5 +33,4 @@ class OrdersController < ApplicationController
   def order_params
     params.require(:order).permit(:address_id, :customer_id, :grand_total)
   end
-
 end

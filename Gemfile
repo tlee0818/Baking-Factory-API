@@ -29,14 +29,15 @@ gem 'jbuilder', '~> 2.5'
 # gem 'redis', '~> 4.0'
 # Use ActiveModel has_secure_password
 gem 'bcrypt', '~> 3.1.7'
-gem 'swagger-docs'
-gem 'active_model_serializers'
 
 # Use Capistrano for deployment
 # gem 'capistrano-rails', group: :development
 
 
 # Other gems
+gem 'swagger-docs'
+gem 'rack-cors'
+gem 'active_model_serializers'
 gem 'chronic', '0.10.2'
 gem 'materialize-sass', '0.100.2'
 gem 'simple_form', '3.5.0'

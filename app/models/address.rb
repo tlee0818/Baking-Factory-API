@@ -87,7 +87,7 @@ class Address < ApplicationRecord
     return true unless self.is_billing
     prior_billing_address = self.customer.addresses.active.billing.first
     unless self == prior_billing_address
-      prior_billing_address.update_attribute(:is_billing, false)
+          prior_billing_address.update_attribute(:is_billing, false)
     end 
-  end
+  end 
 end

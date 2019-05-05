@@ -1,5 +1,12 @@
 class User < ApplicationRecord
   # get modules to help with some functionality
+  require "./lib/helpers/activeable"
+  require "./lib/helpers/baking"
+  require "./lib/helpers/cart"
+  require "./lib/helpers/deletions"
+  require "./lib/helpers/shipping"
+  require "./lib/helpers/validations"
+
   include AppHelpers::Deletions
   include AppHelpers::Activeable::InstanceMethods
   extend AppHelpers::Activeable::ClassMethods
@@ -11,20 +18,20 @@ class User < ApplicationRecord
   has_one :customer
 
   # Scopes
-  scope :by_role,      -> { order(:role) }
+  scope :by_role, -> { order(:role) }
   scope :alphabetical, -> { order(:username) }
-  scope :employees,    -> { where.not(role: 'customer') }
+  scope :employees, -> { where.not(role: "customer") }
 
   # Validations
-  validates :username, presence: true, uniqueness: { case_sensitive: false}
+  validates :username, presence: true, uniqueness: { case_sensitive: false }
   validates :role, inclusion: { in: %w[admin baker shipper customer], message: "is not a recognized role in system" }
-  validates_presence_of :password, on: :create 
-  validates_presence_of :password_confirmation, on: :create 
+  validates_presence_of :password, on: :create
+  validates_presence_of :password_confirmation, on: :create
   validates_confirmation_of :password, on: :create, message: "does not match"
   validates_length_of :password, minimum: 4, message: "must be at least 4 characters long", allow_blank: true
 
   # For use in authorizing with CanCan
-  ROLES = [['Administrator', :admin],['Baker', :baker],['Shipper', :shipper],['Customer',:customer]]
+  ROLES = [["Administrator", :admin], ["Baker", :baker], ["Shipper", :shipper], ["Customer", :customer]]
 
   def role?(authorized_role)
     return false if role.nil?
@@ -33,5 +40,8 @@ class User < ApplicationRecord
 
   # Callbacks
   before_destroy :cannot_destroy_object
-  
+
+  def self.authenticate(username, password)
+    find_by_username(username).try(:authenticate, password)
+  end
 end

@@ -1,9 +1,17 @@
 class Order < ApplicationRecord
   # get module to help with some functionality
+
+  require "./lib/helpers/activeable"
+  require "./lib/helpers/baking"
+  require "./lib/helpers/cart"
+  require "./lib/helpers/deletions"
+  require "./lib/helpers/shipping"
+  require "./lib/helpers/validations"
+
   include AppHelpers::Validations
   include AppHelpers::Deletions
   include AppHelpers::Shipping
-  require 'base64'
+  require "base64"
 
   # Relationships
   belongs_to :customer
@@ -18,14 +26,13 @@ class Order < ApplicationRecord
 
   # Scopes
   scope :chronological, -> { order(date: :desc) }
-  scope :paid,          -> { where.not(payment_receipt: nil) }
-  scope :for_customer,  ->(customer_id) { where(customer_id: customer_id) }
+  scope :paid, -> { where.not(payment_receipt: nil) }
+  scope :for_customer, -> (customer_id) { where(customer_id: customer_id) }
 
   # Class methods
   def self.not_shipped
     # joins(:order_items).where("order_items.shipped_on IS NULL").to_a.uniq
     joins(:order_items).where("order_items.shipped_on IS NULL").distinct
-
   end
 
   # Other methods
@@ -55,11 +62,11 @@ class Order < ApplicationRecord
   end
 
   def total_weight
-    weight = self.order_items.inject(0){|sum, oi| sum += oi.item.weight * oi.quantity}
+    weight = self.order_items.inject(0) { |sum, oi| sum += oi.item.weight * oi.quantity }
   end
 
   def shipping_costs
-    calculate_shipping_costs(self.total_weight, base=2.00)
+    calculate_shipping_costs(self.total_weight, base = 2.00)
   end
 
   def credit_card_type
@@ -77,6 +84,7 @@ class Order < ApplicationRecord
   end
 
   private
+
   def customer_is_active_in_system
     is_active_in_system(:customer)
   end
@@ -103,7 +111,7 @@ class Order < ApplicationRecord
   end
 
   def expiration_date_is_valid
-    return false if self.credit_card_number.nil? 
+    return false if self.credit_card_number.nil?
     if self.expiration_year.nil? || self.expiration_month.nil? || credit_card.expired?
       errors.add(:expiration_year, "is expired")
       return false
@@ -118,6 +126,6 @@ class Order < ApplicationRecord
   end
 
   def remove_order_items
-    self.order_items.each{ |oi| oi.destroy }
+    self.order_items.each { |oi| oi.destroy }
   end
 end
